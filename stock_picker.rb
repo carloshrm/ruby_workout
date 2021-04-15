@@ -19,4 +19,4 @@ def stock_picker(prices)
 end
 
 result = stock_picker([17,3,6,9,15,8,6,1,10])
-puts "Buy on day #{result[0][1]} and sell on day #{result[1][1]} for a profit of #{result[1][0] - result[0][0]}"
+puts "Buy on day #{result[0][1]} and sell on day #{result[1][1]} for a profit of $#{result[1][0]} - $#{result[0][0]} = $#{result[1][0] - result[0][0]}"
