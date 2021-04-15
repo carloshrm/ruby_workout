@@ -1,19 +1,17 @@
-prices = [17,3,6,9,15,8,6,1,10]
+
 def stock_picker(prices)       
     high = [prices.last, 0]
     low = [prices[0], 0]
-    prices.each_with_index do |val,ind|         
-        
+
+    prices.each_with_index do |val,ind|                 
         if val > high[0] && high[1] < low[1]
             high[0] = val
             high[1] = ind            
-        end
-        
+        end        
         if val < low[0] && !(high[1] > low[1])            
             low[0] = val
             low[1] = ind
-        end
-        
+        end        
     end
     return [low, high]
 end
