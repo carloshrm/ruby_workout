@@ -12,4 +12,5 @@ def bubble_sort(numbers, notSorted = true)
     return numbers    
 end
 
+numbers = [4,3,78,2,0,2,-1,32,5,6,-2]
 puts bubble_sort(numbers)
