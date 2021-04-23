@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
-
 # Defines and hold information about the playing grid along with methods to manipulate it.
 class Board
   def initialize
@@ -40,12 +38,12 @@ class Board
   end
 
   def check_win(val)
-    set = [[0, 4, 8], [2, 4, 6], [0, 1, 2],[3,4,5],[6,7,8], [0, 3, 6], [1,4,7], [2,5,8]]
+    set = [[0, 4, 8], [2, 4, 6], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8]]
     set.each do |inner_set|
       result = true
-        inner_set.each do |i|
-          result = @grid[i] == val ? result : false
-        end
+      inner_set.each do |i|
+        result = @grid[i] == val ? result : false
+      end
       next unless result
 
       return result
@@ -72,7 +70,7 @@ class Player
   end
 end
 
-# Hold information about the game implementing Players and Board class, along with rounds and wins. 
+# Hold information about the game implementing Players and Board class, along with rounds and wins.
 # Contains the main methods that control the flow of the game.
 class Game
   attr_accessor :players, :total_rounds
@@ -94,25 +92,25 @@ class Game
   end
 
   def self.setup_rounds
-    puts '== Type in how many rounds to play: '
+    puts '== Type in how many matches to play: '
     round_in = gets.chomp.to_i
-     if round_in > 5
+    if round_in > 5
       round_in = 5
-      puts "-- Going for 5 rounds maximum."
-     end  
+      puts '-- Going for 5 matches maximum.'
+    end
     if round_in.zero?
       round_in = 1
-      puts "-- Defaulting to a minimum of 1 round."
+      puts '-- Defaulting to a minimum of 1 match.'
     end
     round_in
   end
 
   def start_game
-    @round_tracker = {count: 0, @players[0].name => 0, @players[1].name => 0}
+    @round_tracker = { count: 0, @players[0].name => 0, @players[1].name => 0 }
     while @round_tracker[:count] < @total_rounds
       @current_board = Board.new
       puts "\n-- Starting"
-      puts " Round #{@round_tracker[:count]+1} of #{@total_rounds}."
+      puts " Match #{@round_tracker[:count] + 1} of #{@total_rounds}."
       result = run_turn
       check_result(result)
     end
@@ -124,6 +122,7 @@ class Game
       @players.each do |player|
         break if game_state
 
+        puts "\e[H\e[2J"
         puts "-- Player ~ #{player.name} ~ goes next..."
         @current_board.read_board
         @current_board.make_play(player)
@@ -135,26 +134,26 @@ class Game
 
   def check_result(res)
     if res.is_a?(String)
-      puts 'This round ended in a draw.'
+      puts 'This match ended in a draw.'
     else
-      puts "\n!! ~ #{res.name} ~ has won this round !!\n"
+      puts "\n!! ~ #{res.name} ~ has won this match !!\n"
       @round_tracker[res.name] += 1
     end
     @round_tracker[:count] += 1
   end
 
   def game_over
-    puts '\n-- All the rounds are over.'
+    puts "\n -- All matches are over, overall score: "
     overall = 0
     @round_tracker.each do |k, v|
       next if k == :count
 
-      puts "#{k} had #{v} wins."
+      grammar_pls = v > 1 ? 'wins.' : 'win.'
+      puts "#{k} had #{v} #{grammar_pls}."
       overall = v > overall ? v : overall
     end
-    puts "\n#{@round_tracker.key(overall)} is the champion."
+    puts overall.zero? ? 'The game ended in a draw.' : "\n#{@round_tracker.key(overall)} is the champion."
     puts "\n Game Finished. =) "
-    
   end
 end
 
