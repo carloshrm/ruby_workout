@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require 'pry'
 
+# Defines and hold information about the playing grid along with methods to manipulate it.
 class Board
   def initialize
     @grid = Array.new(9) { ' ' }
   end
 
   def read_board
-    display_string = "|   Game   |\n"
+    display_string = "|    Game    |\n"
     @grid.each.with_index(1) do |val, ind|
       display_string += val == ' ' ? "| #{ind} " : "| #{val} "
       display_string += "|\n" if (ind % 3).zero?
@@ -15,61 +18,43 @@ class Board
   end
 
   def make_play(current_player)
-    puts ' -- Type in the number for a position to make a play!'
+    puts ' -- Type in a position to make a play!'
     pos_input = gets.chomp.to_i
     if @grid[pos_input - 1] == ' '
       @grid[pos_input - 1] = current_player.icon
       puts "-- | #{current_player.name} | puts an #{current_player.icon} at #{pos_input}."
     else
-      puts('This position has already been played, select another one: ')
-    end      
+      puts('This position has already been chosen, select another one: ')
+      make_play(current_player)
+    end
   end
 
   def check_condition(player)
     winner = false
-    if @grid.any?(' ')      
-      if check_win(player.icon) == true
-        winner = player
-      end        
+    if @grid.any?(' ')
+      winner = player if check_win(player.icon) == true
     else
       winner = 'draw'
     end
-    return winner
+    winner
   end
 
   def check_win(val)
-    set = [[0, 4, 8], [2, 4, 6], [0, 1, 2], [0, 3, 6]]
+    set = [[0, 4, 8], [2, 4, 6], [0, 1, 2],[3,4,5],[6,7,8], [0, 3, 6], [1,4,7], [2,5,8]]
 
-    set.each_with_index do |inner_set, inner_index|
-      times = 3
-      off_val = 0
+    set.each do |inner_set|
       result = true
-
-      case inner_index
-      when 0, 1
-        times = 1
-      when 2
-        off_val = 3
-      when 3
-        off_val = 1
-      end
-
-      offset = 0
-      times.times do
         inner_set.each do |i|
-          result = @grid[i + offset] == val ? result : false
+          result = @grid[i] == val ? result : false
         end
-        break if result
-  
-        offset + off_val
-      end
+      next unless result
 
-      next unless result  
       return result
     end
   end
 end
 
+# Sets up and stores information about each player.
 class Player
   @@has_player_one = false
   attr_reader :name, :icon
@@ -80,13 +65,16 @@ class Player
   end
 
   def self.set_player
-    puts 'Type in your name: '
+    puts '== Type in your name: '
     ask_name = gets.chomp
-    icon = @@has_player_one ? 'X' : '@'; @@has_player_one = true
+    icon = @@has_player_one ? 'X' : '@'
+    @@has_player_one = true
     Player.new(ask_name, icon)
   end
 end
 
+# Hold information about the game implementing Players and Board class, along with rounds and wins. 
+# Contains the main methods that control the flow of the game.
 class Game
   attr_accessor :players, :total_rounds
 
@@ -101,11 +89,23 @@ class Game
     p_one = Player.set_player
     puts 'Player two --'
     p_two = Player.set_player
-    puts 'Type in how many rounds to play: '
-    get_rounds = gets.chomp.to_i
-    get_rounds = 5 if get_rounds > 5
-    get_rounds = 1 if get_rounds.zero?
+    get_rounds = setup_rounds
+
     Game.new(p_one, p_two, get_rounds)
+  end
+
+  def self.setup_rounds
+    puts '== Type in how many rounds to play: '
+    round_in = gets.chomp.to_i
+     if round_in > 5
+      round_in = 5
+      puts "-- Going for 5 rounds maximum."
+     end  
+    if round_in.zero?
+      round_in = 1
+      puts "-- Defaulting to a minimum of 1 round."
+    end
+    round_in
   end
 
   def start_game
@@ -117,19 +117,18 @@ class Game
       result = run_turn
       check_result(result)
     end
+    puts "\n\n Game Over! =)"
   end
 
-  def run_turn
-    game_state = false
-    until game_state      
+  def run_turn(game_state: false)
+    until game_state
       @players.each do |player|
         break if game_state
 
-        puts "-- Player ~ #{player.name} ~ goes next..."        
+        puts "-- Player ~ #{player.name} ~ goes next..."
         @current_board.read_board
         @current_board.make_play(player)
         game_state = @current_board.check_condition(player)
-        
       end
     end
     game_state
