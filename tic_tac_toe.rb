@@ -9,7 +9,7 @@ class Board
   end
 
   def read_board
-    display_string = "|    Game    |\n"
+    display_string = "|   Game    |\n"
     @grid.each.with_index(1) do |val, ind|
       display_string += val == ' ' ? "| #{ind} " : "| #{val} "
       display_string += "|\n" if (ind % 3).zero?
@@ -41,7 +41,6 @@ class Board
 
   def check_win(val)
     set = [[0, 4, 8], [2, 4, 6], [0, 1, 2],[3,4,5],[6,7,8], [0, 3, 6], [1,4,7], [2,5,8]]
-
     set.each do |inner_set|
       result = true
         inner_set.each do |i|
@@ -84,7 +83,7 @@ class Game
   end
 
   def self.setup_game
-    puts 'welcome'
+    puts '-- Welcome to console Tic-Tac-Toe! --'
     puts 'Player one --'
     p_one = Player.set_player
     puts 'Player two --'
@@ -109,15 +108,15 @@ class Game
   end
 
   def start_game
-    @current_board = Board.new
-    @round_tracker = []
-    while @round_tracker.count < @total_rounds
+    @round_tracker = {count: 0, @players[0].name => 0, @players[1].name => 0}
+    while @round_tracker[:count] < @total_rounds
+      @current_board = Board.new
       puts "\n-- Starting"
-      puts " Round #{@round_tracker.count + 1} of #{@total_rounds}."
+      puts " Round #{@round_tracker[:count]+1} of #{@total_rounds}."
       result = run_turn
       check_result(result)
     end
-    puts "\n\n Game Over! =)"
+    game_over
   end
 
   def run_turn(game_state: false)
@@ -137,17 +136,25 @@ class Game
   def check_result(res)
     if res.is_a?(String)
       puts 'This round ended in a draw.'
-      @round_tracker.push(nil)
     else
-      puts "!! ~ #{res.name} ~ has won this round!"
-      @round_tracker.push(res.name)
+      puts "\n!! ~ #{res.name} ~ has won this round !!\n"
+      @round_tracker[res.name] += 1
     end
-    @current_board.read_board
+    @round_tracker[:count] += 1
   end
 
   def game_over
-    puts '-- All the rounds are over.'
-    # TODO: report
+    puts '\n-- All the rounds are over.'
+    overall = 0
+    @round_tracker.each do |k, v|
+      next if k == :count
+
+      puts "#{k} had #{v} wins."
+      overall = v > overall ? v : overall
+    end
+    puts "\n#{@round_tracker.key(overall)} is the champion."
+    puts "\n Game Finished. =) "
+    
   end
 end
 
