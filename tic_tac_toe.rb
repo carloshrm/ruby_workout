@@ -38,8 +38,8 @@ class Board
   end
 
   def check_win(val)
-    set = [[0, 4, 8], [2, 4, 6], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8]]
-    set.each do |inner_set|
+    preset_matches = [[0, 4, 8], [2, 4, 6], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8]]
+    preset_matches.each do |inner_set|
       result = true
       inner_set.each do |i|
         result = @grid[i] == val ? result : false
@@ -111,8 +111,9 @@ class Game
       @current_board = Board.new
       puts "\n-- Starting"
       puts " Match #{@round_tracker[:count] + 1} of #{@total_rounds}."
-      result = run_turn
-      check_result(result)
+      check_result(run_turn)
+      puts "\n -- press enter to continue --"
+      gets
     end
     game_over
   end
@@ -122,11 +123,11 @@ class Game
       @players.each do |player|
         break if game_state
 
-        puts "\e[H\e[2J"
         puts "-- Player ~ #{player.name} ~ goes next..."
         @current_board.read_board
         @current_board.make_play(player)
         game_state = @current_board.check_condition(player)
+        puts "\e[H\e[2J"
       end
     end
     game_state
@@ -136,9 +137,10 @@ class Game
     if res.is_a?(String)
       puts 'This match ended in a draw.'
     else
-      puts "\n!! ~ #{res.name} ~ has won this match !!\n"
+      puts "\n!! ~ #{res.name} ~ won this match !!\n"
       @round_tracker[res.name] += 1
     end
+    @current_board.read_board
     @round_tracker[:count] += 1
   end
 
@@ -148,11 +150,12 @@ class Game
     @round_tracker.each do |k, v|
       next if k == :count
 
-      grammar_pls = v > 1 ? 'wins.' : 'win.'
-      puts "#{k} had #{v} #{grammar_pls}."
+      grammar_pls = v > 1 ? 'wins' : 'win'
+      puts "=> #{k} had #{v} #{grammar_pls}."
       overall = v > overall ? v : overall
     end
-    puts overall.zero? ? 'The game ended in a draw.' : "\n#{@round_tracker.key(overall)} is the champion."
+    @round_tracker[:count] = -1
+    puts overall.zero? ? 'The game ended in a draw.' : "\n !! #{@round_tracker.key(overall)} is the champion!!"
     puts "\n Game Finished. =) "
   end
 end
