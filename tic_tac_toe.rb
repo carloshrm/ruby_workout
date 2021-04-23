@@ -64,6 +64,8 @@ class Player
   def self.set_player
     puts '== Type in your name: '
     ask_name = gets.chomp
+    ask_name = ask_name.empty? ? "John Doe" : ask_name
+    puts "Hi #{ask_name}!\n"
     icon = @@has_player_one ? 'X' : '@'
     @@has_player_one = true
     Player.new(ask_name, icon)
